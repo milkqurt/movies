@@ -4,6 +4,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -27,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
     private MovieAdapter movieAdapter;
     private ArrayList<Movie> movies;
     private RequestQueue requestQueue;
+    private EditText searchEditText;
+    private Button searchButton;
+    private String apiKey = "61fee442";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,11 +44,27 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         movies = new ArrayList<>();
         requestQueue = Volley.newRequestQueue(this);
-        getMovies();
+
+        // Получаем ссылки на EditText и Button
+        searchEditText = findViewById(R.id.search_edit_text);
+        searchButton = findViewById(R.id.search_button);
+
+        // Назначаем слушателя для кнопки поиска
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String query = searchEditText.getText().toString().trim();
+                if (!TextUtils.isEmpty(query)) {
+                    // Выполняем запрос к API с использованием введенного пользователем запроса
+                    String url = "https://www.omdbapi.com/?apikey=" + apiKey + "&s=" + query;
+                    movies.clear();
+                    getMovies(url);
+                }
+            }
+        });
     }
 
-    private void getMovies() {
-        String url = "https://www.omdbapi.com/?apikey=61fee442&s=horror";
+    private void getMovies(String url) {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET,
                 url, null, new Response.Listener<JSONObject>() {
             @Override
